@@ -54,7 +54,13 @@ let
     fi
 
     gcloud container clusters get-credentials ${cfg.cluster.name} --region ${cfg.cluster.region} --project ${cfg.cluster.projectId}
-    echo -e "\033[34m=== 🟢 Connected to cluster: ${cfg.cluster.name} in ${cfg.cluster.region} ===\033[0m"
+    ${lib.optionalString (cfg.cluster.namespace != "") ''
+      kubectl config set-context --current --namespace=${cfg.cluster.namespace}
+      echo -e "\033[34m=== 🟢 Connected to cluster: ${cfg.cluster.name} in ${cfg.cluster.region} (namespace: ${cfg.cluster.namespace}) ===\033[0m"
+    ''}
+    ${lib.optionalString (cfg.cluster.namespace == "") ''
+      echo -e "\033[34m=== 🟢 Connected to cluster: ${cfg.cluster.name} in ${cfg.cluster.region} ===\033[0m"
+    ''}
     ${lib.optionalString cfg.printVersions ''
       source ${getVersions}
     ''}
@@ -104,6 +110,12 @@ in
         type = lib.types.bool;
         default = true;
         description = "Automatically fetch cluster credentials on shell initialization";
+      };
+
+      namespace = lib.mkOption {
+        type = lib.types.str;
+        default = "";
+        description = "Default Kubernetes namespace to use for kubectl commands";
       };
     };
 
