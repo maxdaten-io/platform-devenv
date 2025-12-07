@@ -48,8 +48,8 @@ let
       echo "google-cloud.cluster.region is not set" >&2
       exit 1
     fi
-    if [[ -z "${cfg.projectId}" ]]; then
-      echo "google-cloud.project is not set" >&2
+    if [[ -z "${cfg.cluster.projectId}" ]]; then
+      echo "google-cloud.cluster.project is not set" >&2
       exit 1
     fi
 
