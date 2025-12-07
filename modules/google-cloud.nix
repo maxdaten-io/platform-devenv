@@ -200,17 +200,17 @@ in
         export KUBECONFIG=${kubernetesConfig}
         # Fetch credentials
         source ${getClusterCredentialsScript}
-        echo -n "${cfg.cluster.name}:${cfg.cluster.region}:${cfg.cluster.projectId}" > ${stateDirectory}/cluster.stamp
+        echo -n "${cfg.cluster.name}:${cfg.cluster.region}:${cfg.cluster.projectId}:${cfg.cluster.namespace}" > ${stateDirectory}/cluster.stamp
       '';
       before = [
         "devenv:enterShell"
         "devenv:enterTest"
       ];
       status = ''
-        # If stamp matches desired cluster, and KUBECONFIG exists, skip
+        # If stamp matches desired cluster and namespace, and KUBECONFIG exists, skip
         [ -f ${stateDirectory}/cluster.stamp ] || exit 1
         [ -f ${kubernetesConfig} ] || exit 1
-        [ "$(cat ${stateDirectory}/cluster.stamp)" = "${cfg.cluster.name}:${cfg.cluster.region}:${cfg.cluster.projectId}" ]
+        [ "$(cat ${stateDirectory}/cluster.stamp)" = "${cfg.cluster.name}:${cfg.cluster.region}:${cfg.cluster.projectId}:${cfg.cluster.namespace}" ]
       '';
     };
 
