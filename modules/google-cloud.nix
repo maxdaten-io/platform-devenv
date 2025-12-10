@@ -220,8 +220,6 @@ in
       to=$(kubectl get secret "$as" --namespace "$2" -o jsonpath='{.data.token}'|base64 -d) && echo "K8S_SA_TOKEN: $to"
     '';
 
-    scripts.gcp-costs.exec = ''
-      ${./scripts/gcp-costs.sh} "$@"
-    '';
+    scripts.gcp-costs-analyzer.exec = ./scripts/gcp-costs.sh;
   };
 }
