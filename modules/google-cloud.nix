@@ -152,6 +152,7 @@ in
         k9s
         terraformer
         gke-gcloud-auth-plugin
+        google-cloud-sql-proxy
 
         # extended cluster management tools
         cmctl
