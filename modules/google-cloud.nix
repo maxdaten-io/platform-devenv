@@ -124,8 +124,6 @@ in
       default = false;
       description = "Print versions of kubectl and crossplane after connecting to the cluster (slows down devenv start).";
     };
-
-    sops.enable = lib.mkEnableOption "Mozilla SOPS for secrets management";
   };
 
   config = lib.mkIf cfg.enable {
@@ -162,10 +160,6 @@ in
         istioctl
         kubernetes-helm-wrapped
         telepresence2
-      ]
-      ++ lib.optionals cfg.sops.enable [
-        sops
-        kustomize-sops
       ];
 
     env = lib.mkMerge [

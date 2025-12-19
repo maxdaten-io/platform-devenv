@@ -55,7 +55,6 @@ GKE cluster access and GCP tools.
 | `google-cloud.cluster.name` | string | "" | GKE cluster name |
 | `google-cloud.cluster.region` | string | "" | GKE cluster region |
 | `google-cloud.cluster.getCredentials` | bool | true | Auto-fetch cluster credentials on shell entry |
-| `google-cloud.sops.enable` | bool | false | Enable SOPS for secrets management |
 
 **Provided tools:**
 
