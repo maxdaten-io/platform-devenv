@@ -3,7 +3,19 @@
 # Fetches Composition, Functions, and EnvironmentConfigs from the cluster.
 #
 # Usage: validate-database <database-yaml>
-# Example: validate-database k8s/app/mealie/database.yaml
+#
+# Examples:
+#   # Validate a local file
+#   validate-database k8s/app/mealie/database.yaml
+#
+#   # Validate from cluster (bash)
+#   validate-database <(kubectl get database.platform.maxdaten.io mealie -n 0-gh-mealieservice-ffed -o yaml)
+#
+#   # Validate from cluster (fish)
+#   validate-database (kubectl get database.platform.maxdaten.io mealie -n 0-gh-mealieservice-ffed -o yaml | psub)
+#
+# Note: Local files must include namespace and labels that are normally applied by Flux.
+#       Cluster resources already have these applied.
 
 set -euo pipefail
 
@@ -18,10 +30,19 @@ usage() {
     echo "Fetches Composition, Functions, and EnvironmentConfigs from the cluster."
     echo ""
     echo "Arguments:"
-    echo "  database-yaml  Path to Database resource YAML file"
+    echo "  database-yaml  Path to Database resource YAML file (or process substitution)"
     echo ""
-    echo "Example:"
+    echo "Examples:"
+    echo "  # Validate a local file"
     echo "  $0 k8s/app/database.yaml"
+    echo ""
+    echo "  # Validate from cluster (bash)"
+    echo "  $0 <(kubectl get database.platform.maxdaten.io mealie -n NAMESPACE -o yaml)"
+    echo ""
+    echo "  # Validate from cluster (fish)"
+    echo "  $0 (kubectl get database.platform.maxdaten.io mealie -n NAMESPACE -o yaml | psub)"
+    echo ""
+    echo "Note: Local files must include namespace and labels normally applied by Flux."
     exit 1
 }
 
