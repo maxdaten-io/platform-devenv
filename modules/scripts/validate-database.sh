@@ -40,7 +40,7 @@ echo "Fetching resources from cluster..."
 
 # Fetch the Database composition
 echo "  → Fetching Database composition..."
-kubectl get composition database -o yaml > "${TEMP_DIR}/composition.yaml" 2>/dev/null || {
+kubectl get composition database-platform-postgres -o yaml > "${TEMP_DIR}/composition.yaml" 2>/dev/null || {
     echo "Error: Could not fetch 'database' Composition from cluster" >&2
     echo "Make sure the Database composition is deployed and you have cluster access" >&2
     exit 1
