@@ -1,0 +1,3 @@
+inputs:
+  gcloud-auth-plugin:
+    url: github:maxdaten-io/gke-gcloud-auth-plugin-nix
