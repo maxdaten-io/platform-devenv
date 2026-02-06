@@ -31,6 +31,41 @@
         "type": "github"
       }
     },
+    "flake-utils": {
+      "inputs": {
+        "systems": "systems"
+      },
+      "locked": {
+        "lastModified": 1731533236,
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "rev": "11707dc2f618dd54ca8739b309ec4fc024de578b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "type": "github"
+      }
+    },
+    "gcloud-auth-plugin": {
+      "inputs": {
+        "flake-utils": "flake-utils",
+        "nixpkgs": "nixpkgs"
+      },
+      "locked": {
+        "lastModified": 1716155341,
+        "owner": "maxdaten-io",
+        "repo": "gke-gcloud-auth-plugin-nix",
+        "rev": "a3c7b88d6b8998d6c944ad7fbb54d76c96dc39c9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "maxdaten-io",
+        "repo": "gke-gcloud-auth-plugin-nix",
+        "type": "github"
+      }
+    },
     "git-hooks": {
       "inputs": {
         "flake-compat": "flake-compat",
@@ -74,6 +109,19 @@
     },
     "nixpkgs": {
       "locked": {
+        "lastModified": 1769527094,
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "afce96367b2e37fc29afb5543573cd49db3357b7",
+        "type": "github"
+      },
+      "original": {
+        "id": "nixpkgs",
+        "type": "indirect"
+      }
+    },
+    "nixpkgs_2": {
+      "locked": {
         "lastModified": 1767052823,
         "owner": "cachix",
         "repo": "devenv-nixpkgs",
@@ -90,11 +138,26 @@
     "root": {
       "inputs": {
         "devenv": "devenv",
+        "gcloud-auth-plugin": "gcloud-auth-plugin",
         "git-hooks": "git-hooks",
-        "nixpkgs": "nixpkgs",
+        "nixpkgs": "nixpkgs_2",
         "pre-commit-hooks": [
           "git-hooks"
         ]
+      }
+    },
+    "systems": {
+      "locked": {
+        "lastModified": 1681028828,
+        "owner": "nix-systems",
+        "repo": "default",
+        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-systems",
+        "repo": "default",
+        "type": "github"
       }
     }
   },
