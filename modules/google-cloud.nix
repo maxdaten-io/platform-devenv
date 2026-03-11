@@ -124,6 +124,16 @@ in
       default = false;
       description = "Print versions of kubectl and crossplane after connecting to the cluster (slows down devenv start).";
     };
+
+    knowledge-mcp = {
+      enable = lib.mkEnableOption "Google Developer Knowledge API MCP server";
+
+      url = lib.mkOption {
+        type = lib.types.str;
+        default = "https://developerknowledge.googleapis.com/mcp";
+        description = "URL of the Developer Knowledge MCP endpoint";
+      };
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -216,5 +226,10 @@ in
     '';
 
     scripts.gcp-costs-analyzer.exec = ./scripts/gcp-costs.sh;
+
+    claude.code.mcpServers.google-developer-knowledge = lib.mkIf cfg.knowledge-mcp.enable {
+      type = "http";
+      url = cfg.knowledge-mcp.url;
+    };
   };
 }
