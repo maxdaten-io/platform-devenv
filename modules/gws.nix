@@ -13,6 +13,25 @@ let
     set -euo pipefail
     mkdir -p ${configDir}
 
+    # Check if SM secrets are populated
+    if ! gcloud secrets versions access latest \
+        --secret=gws-oauth-client-id \
+        --project=${cfg.projectId} >/dev/null 2>&1; then
+      echo ""
+      echo "gws: OAuth client credentials not found in Secret Manager."
+      echo ""
+      echo "To set up:"
+      echo "  1. Go to https://console.cloud.google.com/apis/credentials?project=${cfg.projectId}"
+      echo "  2. Create an OAuth 2.0 Client ID (type: Desktop app)"
+      echo "  3. Store the credentials:"
+      echo "     echo -n 'CLIENT_ID' | gcloud secrets versions add gws-oauth-client-id --project=${cfg.projectId} --data-file=-"
+      echo "     echo -n 'CLIENT_SECRET' | gcloud secrets versions add gws-oauth-client-secret --project=${cfg.projectId} --data-file=-"
+      echo ""
+      echo "Or run 'gws auth setup --project ${cfg.projectId}' to create the client interactively,"
+      echo "then store the values from the generated client_secret.json into SM."
+      exit 0
+    fi
+
     client_id="$(gcloud secrets versions access latest \
       --secret=gws-oauth-client-id \
       --project=${cfg.projectId})"
@@ -20,19 +39,12 @@ let
       --secret=gws-oauth-client-secret \
       --project=${cfg.projectId})"
 
-    cat > ${clientSecretFile} <<ENDJSON
-    {
-      "installed": {
-        "client_id": "$client_id",
-        "client_secret": "$client_secret",
-        "project_id": "${cfg.projectId}",
-        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-        "token_uri": "https://oauth2.googleapis.com/token",
-        "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-        "redirect_uris": ["http://localhost"]
-      }
-    }
-    ENDJSON
+    ${pkgs.jq}/bin/jq -n \
+      --arg cid "$client_id" \
+      --arg csec "$client_secret" \
+      --arg pid "${cfg.projectId}" \
+      '{installed:{client_id:$cid,client_secret:$csec,project_id:$pid,auth_uri:"https://accounts.google.com/o/oauth2/auth",token_uri:"https://oauth2.googleapis.com/token",auth_provider_x509_cert_url:"https://www.googleapis.com/oauth2/v1/certs",redirect_uris:["http://localhost"]}}' \
+      > ${clientSecretFile}
     echo "gws: fetched OAuth client credentials from Secret Manager"
   '';
 in
