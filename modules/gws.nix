@@ -80,7 +80,7 @@ in
     env.CLOUDSDK_BILLING_QUOTA_PROJECT = cfg.projectId;
 
     tasks."gws:fetch-credentials" = {
-      exec = fetchClientSecretScript;
+      exec = "source ${fetchClientSecretScript}";
       before = [ "gws:auth-check" ];
       status = ''
         [ -f ${clientSecretFile} ]
