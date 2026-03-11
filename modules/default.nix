@@ -5,6 +5,7 @@
     ./crossplane.nix
     ./google-cloud.nix
     ./github.nix
+    ./gws.nix
     ./krmc.nix
   ];
 }
