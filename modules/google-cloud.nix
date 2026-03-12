@@ -133,6 +133,12 @@ in
         default = "https://developerknowledge.googleapis.com/mcp";
         description = "URL of the Developer Knowledge MCP endpoint";
       };
+
+      apiKeyEnv = lib.mkOption {
+        type = lib.types.str;
+        default = "GOOGLE_DEVELOPER_KNOWLEDGE_API_KEY";
+        description = "Name of the environment variable containing the API key";
+      };
     };
   };
 
@@ -230,6 +236,9 @@ in
     claude.code.mcpServers.google-developer-knowledge = lib.mkIf cfg.knowledge-mcp.enable {
       type = "http";
       url = cfg.knowledge-mcp.url;
+      headers = {
+        x-goog-api-key = "\${${cfg.knowledge-mcp.apiKeyEnv}}";
+      };
     };
   };
 }
