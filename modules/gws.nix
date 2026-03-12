@@ -9,6 +9,16 @@ let
   configDir = "${config.devenv.state}/gws";
   clientSecretFile = "${configDir}/client_secret.json";
 
+  wrappedGws = pkgs.symlinkJoin {
+    name = "gws-wrapped";
+    paths = [ cfg.package ];
+    nativeBuildInputs = [ pkgs.makeWrapper ];
+    postBuild = ''
+      wrapProgram $out/bin/gws \
+        --set CLOUDSDK_BILLING_QUOTA_PROJECT "${cfg.projectId}"
+    '';
+  };
+
   fetchClientSecretScript = pkgs.writeShellScript "gws-fetch-client-secret.sh" ''
     set -euo pipefail
     mkdir -p ${configDir}
@@ -74,10 +84,9 @@ in
       }
     ];
 
-    packages = [ cfg.package ];
+    packages = [ wrappedGws ];
 
     env.GOOGLE_WORKSPACE_CLI_CONFIG_DIR = configDir;
-    env.CLOUDSDK_BILLING_QUOTA_PROJECT = cfg.projectId;
 
     tasks."gws:fetch-credentials" = {
       exec = "source ${fetchClientSecretScript}";
