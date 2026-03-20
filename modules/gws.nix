@@ -9,15 +9,10 @@ let
   configDir = "${config.devenv.state}/gws";
   clientSecretFile = "${configDir}/client_secret.json";
 
-  wrappedGws = pkgs.symlinkJoin {
-    name = "gws-wrapped";
-    paths = [ cfg.package ];
-    nativeBuildInputs = [ pkgs.makeWrapper ];
-    postBuild = ''
-      wrapProgram $out/bin/gws \
-        --set CLOUDSDK_BILLING_QUOTA_PROJECT "${cfg.projectId}"
-    '';
-  };
+  wrappedGws = pkgs.writeShellScriptBin "gws" ''
+    export CLOUDSDK_BILLING_QUOTA_PROJECT="${cfg.projectId}"
+    exec ${cfg.package}/bin/gws "$@"
+  '';
 
   fetchClientSecretScript = pkgs.writeShellScript "gws-fetch-client-secret.sh" ''
     set -euo pipefail
