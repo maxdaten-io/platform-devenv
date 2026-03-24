@@ -72,8 +72,10 @@ in
 
     sdk-package = lib.mkOption {
       type = lib.types.package;
-      default = pkgs.google-cloud-sdk;
-      defaultText = "pkgs.google-cloud-sdk";
+      default = pkgs.google-cloud-sdk.withExtraComponents [
+        pkgs.google-cloud-sdk.components.log-streaming
+      ];
+      defaultText = "pkgs.google-cloud-sdk.withExtraComponents [ log-streaming ]";
       description = "The package to use for google-cloud-sdk";
     };
 
