@@ -1,0 +1,81 @@
+name: Publish K8s Manifests
+
+on:
+  workflow_call:
+    inputs:
+      manifest-path:
+        description: "Path to K8s manifests directory"
+        type: string
+        default: "k8s/"
+      image-name:
+        description: "OCI image name"
+        type: string
+        default: "manifests"
+    # Callers use `secrets: inherit` to pass these:
+    #   WORKLOAD_IDENTITY_PROVIDER - GCP WIF provider resource name
+    #   SERVICE_ACCOUNT_EMAIL      - GCP service account for WIF
+    #   ARTIFACT_REGISTRY_URL      - Base registry URL (region + project)
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  publish:
+    name: Publish OCI Artifact
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Validate manifests
+        run: kubectl kustomize ${{ inputs.manifest-path }} > /dev/null
+
+      - id: auth
+        name: Authenticate to GCP
+        uses: google-github-actions/auth@v3
+        with:
+          token_format: access_token
+          workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.SERVICE_ACCOUNT_EMAIL }}
+
+      - name: Setup Flux CLI
+        uses: fluxcd/flux2/action@main
+
+      - id: push
+        name: Publish OCI artifact
+        env:
+          ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
+          REGISTRY_URL: ${{ secrets.ARTIFACT_REGISTRY_URL }}
+          IMAGE_NAME: ${{ inputs.image-name }}
+          MANIFEST_PATH: ${{ inputs.manifest-path }}
+        run: |
+          TAG="${GITHUB_SHA::8}"
+          URL="oci://${REGISTRY_URL}/oci/${IMAGE_NAME}:${TAG}"
+
+          PUSH_OUTPUT=$(flux push artifact "$URL" \
+            --path="./${MANIFEST_PATH}" \
+            --source="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" \
+            --revision="${GITHUB_REF_NAME}@sha1:${GITHUB_SHA}" \
+            --creds="oauth2accesstoken:${ACCESS_TOKEN}" \
+            --output json)
+
+          DIGEST=$(echo "${PUSH_OUTPUT}" | jq -r '.digest')
+          echo "digest=${DIGEST}" >> "$GITHUB_OUTPUT"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+
+          flux tag artifact "$URL" --tag latest \
+            --creds="oauth2accesstoken:${ACCESS_TOKEN}"
+
+          echo "Published ${URL} (${DIGEST})"
+
+      - name: Summary
+        env:
+          REGISTRY_URL: ${{ secrets.ARTIFACT_REGISTRY_URL }}
+          TAG: ${{ steps.push.outputs.tag }}
+          DIGEST: ${{ steps.push.outputs.digest }}
+        run: |
+          echo "## OCI Artifact Published" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Registry:** \`${REGISTRY_URL}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Tags:** \`${TAG}\`, \`latest\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Digest:** \`${DIGEST}\`" >> "$GITHUB_STEP_SUMMARY"
