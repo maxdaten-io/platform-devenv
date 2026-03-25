@@ -7,5 +7,6 @@
     ./github.nix
     ./gws.nix
     ./krmc.nix
+    ./platform-cli.nix
   ];
 }
