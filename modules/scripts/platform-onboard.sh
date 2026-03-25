@@ -181,6 +181,11 @@ done
 
 validate_budget "$BUDGET"
 
+# Filter empty elements from APIS (gum/mapfile may produce empty strings)
+_clean_apis=()
+for _a in "${APIS[@]+"${APIS[@]}"}"; do [[ -n "$_a" ]] && _clean_apis+=("$_a"); done
+APIS=("${_clean_apis[@]+"${_clean_apis[@]}"}")
+
 if [[ ${#APIS[@]} -gt 0 ]]; then
   validate_apis "${APIS[@]}"
 fi
