@@ -1,0 +1,19 @@
+name: Timestamp Tag
+
+on:
+  workflow_call:
+    outputs:
+      timestamp:
+        description: "Generated YYYYMMDD.HHMMSS UTC timestamp tag"
+        value: ${{ jobs.generate.outputs.timestamp }}
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    outputs:
+      timestamp: ${{ steps.ts.outputs.tag }}
+    steps:
+      - name: Generate timestamp tag
+        id: ts
+        run: |
+          echo "tag=$(date -u +'%Y%m%d.%H%M%S')" >> "$GITHUB_OUTPUT"
