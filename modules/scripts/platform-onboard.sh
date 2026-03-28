@@ -3,7 +3,19 @@
 set -euo pipefail
 
 # --- Constants ---
-API_ALLOWLIST=("sqladmin.googleapis.com" "aiplatform.googleapis.com" "gmail.googleapis.com")
+SCHEMA_URL="https://raw.githubusercontent.com/maxdaten-io/gitops/main/foundation/04-platform/functions/webhook-relay/schemas/platform_v1.json"
+FALLBACK_API_ALLOWLIST=("sqladmin.googleapis.com" "aiplatform.googleapis.com" "gmail.googleapis.com" "storage.googleapis.com")
+
+# Fetch API allowlist from schema (single source of truth), fall back to hardcoded list
+if schema_json=$(curl -sfL --max-time 5 "$SCHEMA_URL" 2>/dev/null); then
+  mapfile -t API_ALLOWLIST < <(echo "$schema_json" | jq -r '.properties.apis.items.enum[]')
+  if [[ ${#API_ALLOWLIST[@]} -eq 0 ]]; then
+    API_ALLOWLIST=("${FALLBACK_API_ALLOWLIST[@]}")
+  fi
+else
+  API_ALLOWLIST=("${FALLBACK_API_ALLOWLIST[@]}")
+fi
+
 BUDGET_MIN=1
 BUDGET_MAX=20
 BUDGET_DEFAULT=3
@@ -150,7 +162,7 @@ if [[ "$INTERACTIVE" == "true" ]]; then
 
   if [[ ${#APIS[@]} -eq 0 ]]; then
     mapfile -t APIS < <(gum choose --no-limit --header "Additional GCP APIs (space to select)" \
-      "sqladmin.googleapis.com" "aiplatform.googleapis.com" "gmail.googleapis.com" || true)
+      "${API_ALLOWLIST[@]}" || true)
   fi
 
   if [[ -z "$MANIFEST_PATH" ]]; then
@@ -234,7 +246,7 @@ HEADER
   echo ""
   if [[ ${#APIS[@]} -eq 0 ]]; then
     echo "# Additional GCP APIs to enable in the provisioned project."
-    echo "# Only allowed: sqladmin.googleapis.com, aiplatform.googleapis.com, gmail.googleapis.com"
+    echo "# Allowed: ${API_ALLOWLIST[*]}"
     echo "# apis: []"
   else
     echo "# Additional GCP APIs to enable in the provisioned project."
