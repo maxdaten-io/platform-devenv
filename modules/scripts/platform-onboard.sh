@@ -10,9 +10,11 @@ FALLBACK_API_ALLOWLIST=("sqladmin.googleapis.com" "aiplatform.googleapis.com" "g
 if schema_json=$(curl -sfL --max-time 5 "$SCHEMA_URL" 2>/dev/null); then
   mapfile -t API_ALLOWLIST < <(echo "$schema_json" | jq -r '.properties.apis.items.enum[]')
   if [[ ${#API_ALLOWLIST[@]} -eq 0 ]]; then
+    echo "Warning: fetched schema but could not extract API list, using offline fallback." >&2
     API_ALLOWLIST=("${FALLBACK_API_ALLOWLIST[@]}")
   fi
 else
+  echo "Warning: could not fetch API schema from GitHub, using offline fallback list." >&2
   API_ALLOWLIST=("${FALLBACK_API_ALLOWLIST[@]}")
 fi
 
